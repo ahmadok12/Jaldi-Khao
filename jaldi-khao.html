@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jaldi Khao! 🍳</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #FF6B00; --yellow: #FFD600; --red: #FF1744;
+    --bg: #FFF8F0; --card: #ffffff; --muted: #8B4513;
+  }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    overflow-x: hidden; padding: 1.5rem 1rem;
+  }
+  .blob { position: fixed; border-radius: 50%; filter: blur(70px); opacity: 0.2; z-index: 0; animation: blobFloat 8s ease-in-out infinite; }
+  .blob1 { width: 400px; height: 400px; background: var(--orange); top: -120px; left: -120px; }
+  .blob2 { width: 300px; height: 300px; background: var(--yellow); bottom: -80px; right: -80px; animation-delay: 3s; }
+  .blob3 { width: 200px; height: 200px; background: var(--red); top: 40%; left: 55%; animation-delay: 5s; }
+  @keyframes blobFloat { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(20px,-20px) scale(1.05)} }
+
+  .container { position: relative; z-index: 1; text-align: center; max-width: 500px; width: 100%; }
+  .emoji-row { font-size: 2.5rem; margin-bottom: 0.5rem; animation: wiggle 2s ease-in-out infinite; }
+  @keyframes wiggle { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+  h1 {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(3rem, 13vw, 5.5rem);
+    font-weight: 800; color: var(--orange); line-height: 1;
+    text-shadow: 4px 4px 0px var(--yellow), 6px 6px 0px rgba(0,0,0,0.08);
+  }
+  .subtitle { font-size: 0.9rem; color: var(--muted); margin-top: 0.3rem; font-weight: 600; opacity: 0.8; }
+
+  .ring-wrap { margin: 1.5rem auto 0; position: relative; width: 150px; height: 150px; }
+  svg.ring { transform: rotate(-90deg); width: 150px; height: 150px; }
+  .ring-bg { fill: none; stroke: #FFE0B2; stroke-width: 10; }
+  .ring-fill { fill: none; stroke: var(--orange); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.5s; }
+  .ring-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; }
+  .ring-text .num { font-family: 'Baloo 2', cursive; font-size: 2.8rem; font-weight: 800; color: var(--orange); line-height: 1; }
+  .ring-text .sec-label { font-size: 0.7rem; color: var(--muted); font-weight: 700; opacity: 0.7; }
+
+  .controls-card {
+    background: var(--card); border-radius: 20px; padding: 1.2rem 1.4rem;
+    margin-top: 1.5rem; box-shadow: 0 4px 24px rgba(255,107,0,0.1);
+    border: 1.5px solid #FFE0B2; text-align: left;
+  }
+  .section-label {
+    font-size: 0.72rem; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;
+  }
+  .slider-row { display: flex; align-items: center; gap: 0.8rem; }
+  input[type=range] {
+    flex: 1; -webkit-appearance: none; height: 6px; border-radius: 3px;
+    background: #FFE0B2; outline: none; cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--orange); box-shadow: 0 2px 8px rgba(255,107,0,0.4); cursor: grab;
+  }
+  .slider-val { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; color: var(--orange); min-width: 52px; text-align: right; }
+
+  .voice-tabs { display: flex; border-radius: 10px; overflow: hidden; border: 1.5px solid #FFE0B2; margin-bottom: 0.8rem; }
+  .voice-tab {
+    flex: 1; padding: 0.5rem 0.3rem; text-align: center;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem;
+    cursor: pointer; background: #FFF8F0; color: var(--muted);
+    border: none; transition: background 0.2s, color 0.2s;
+  }
+  .voice-tab.active { background: var(--orange); color: #fff; }
+
+  .tts-section, .record-section { display: none; }
+  .tts-section.visible, .record-section.visible { display: block; }
+
+  .tts-input-row { display: flex; gap: 0.5rem; align-items: center; }
+  .tts-input-row input[type=text] {
+    flex: 1; padding: 0.5rem 0.75rem;
+    border: 1.5px solid #FFE0B2; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 0.9rem;
+    background: #FFF8F0; color: #1A0A00; outline: none;
+  }
+  .tts-input-row input:focus { border-color: var(--orange); }
+
+  .record-btn-row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .btn-sm {
+    font-family: 'Baloo 2', cursive; font-size: 0.88rem; font-weight: 700;
+    padding: 0.42rem 0.9rem; border: none; border-radius: 50px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+    white-space: nowrap;
+  }
+  .btn-sm:active { transform: translateY(1px); }
+  .btn-sm:hover { transform: translateY(-1px); }
+  .btn-record { background: var(--red); color: #fff; }
+  .btn-stop-rec { background: #555; color: #fff; display: none; }
+  .btn-play { background: #4CAF50; color: #fff; display: none; }
+  .btn-clear { background: #eee; color: #555; display: none; }
+  .btn-test { background: #FF9800; color: #fff; }
+
+  .rec-status { font-size: 0.8rem; color: var(--muted); font-weight: 600; margin-top: 0.5rem; min-height: 1.2rem; }
+  .rec-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--red); margin-right: 4px; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .divider { height: 1px; background: #FFE0B2; margin: 0.9rem 0; }
+
+  .btn-row { display: flex; gap: 0.8rem; justify-content: center; margin-top: 1.2rem; }
+  .btn-main {
+    font-family: 'Baloo 2', cursive; font-size: 1.2rem; font-weight: 700;
+    padding: 0.7rem 2rem; border: none; border-radius: 50px; cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+  }
+  .btn-main:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+  .btn-main:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,0.18); }
+  #startBtn { background: var(--orange); color: #fff; }
+  #stopBtn { background: #eee; color: #555; display: none; }
+
+  .status { margin-top: 0.8rem; font-size: 0.88rem; color: var(--muted); min-height: 1.4rem; }
+  .count-badge { display: inline-block; background: var(--orange); color: #fff; border-radius: 50px; padding: 0.1rem 0.6rem; font-family: 'Baloo 2', cursive; font-size: 0.85rem; font-weight: 700; }
+  .log { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.35rem; justify-content: center; max-height: 60px; overflow: hidden; }
+  .log-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--orange); opacity: 0; animation: popIn 0.3s ease forwards; }
+  @keyframes popIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+
+  @keyframes alertFlash { 0%{transform:scale(1)} 15%{transform:scale(1.18) rotate(-3deg)} 30%{transform:scale(1.15) rotate(3deg)} 45%{transform:scale(1.18) rotate(-2deg)} 60%{transform:scale(1.12) rotate(2deg)} 100%{transform:scale(1)} }
+  @keyframes bgFlash { 0%,100%{background:var(--bg)} 25%{background:#FFE0B2} 50%{background:#FFCC80} }
+  body.flash { animation: bgFlash 0.6s ease; }
+  h1.shake { animation: alertFlash 0.6s ease; }
+</style>
+</head>
+<body>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<div class="container">
+  <div class="emoji-row">🍳🥛🍞</div>
+  <h1 id="mainText">جلدی کھاؤ!</h1>
+  <p class="subtitle">Reminder fires every <strong id="intervalLabel">30</strong> seconds</p>
+
+  <div class="ring-wrap">
+    <svg class="ring" viewBox="0 0 130 130">
+      <circle class="ring-bg" cx="65" cy="65" r="58"/>
+      <circle class="ring-fill" id="ringFill" cx="65" cy="65" r="58"/>
+    </svg>
+    <div class="ring-text">
+      <div class="num" id="countdown">30</div>
+      <div class="sec-label">seconds</div>
+    </div>
+  </div>
+
+  <div class="controls-card">
+
+    <!-- Timer -->
+    <div class="section-label">⏱ Reminder Interval</div>
+    <div class="slider-row">
+      <input type="range" id="intervalSlider" min="5" max="120" step="5" value="30">
+      <div class="slider-val"><span id="sliderDisplay">30</span>s</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Voice mode -->
+    <div class="section-label">🔊 Alert Sound</div>
+    <div class="voice-tabs">
+      <button class="voice-tab active" onclick="setVoiceMode('beep')">🔔 Beep</button>
+      <button class="voice-tab" onclick="setVoiceMode('tts')">🗣 Urdu Voice</button>
+      <button class="voice-tab" onclick="setVoiceMode('record')">🎙 My Voice</button>
+    </div>
+
+    <!-- TTS panel -->
+    <div class="tts-section" id="ttsSection">
+      <div class="tts-input-row">
+        <input type="text" id="ttsText" value="جلدی کھاؤ" placeholder="Type message…" dir="auto">
+        <button class="btn-sm btn-test" onclick="testTTS()">▶ Test</button>
+      </div>
+      <div class="rec-status" id="ttsStatus"></div>
+    </div>
+
+    <!-- Record panel -->
+    <div class="record-section" id="recordSection">
+      <div class="record-btn-row">
+        <button class="btn-sm btn-record" id="recBtn" onclick="startRecording()">⏺ Record</button>
+        <button class="btn-sm btn-stop-rec" id="stopRecBtn" onclick="stopRecording()">⏹ Stop</button>
+        <button class="btn-sm btn-play" id="playRecBtn" onclick="playRecording()">▶ Play</button>
+        <button class="btn-sm btn-clear" id="clearRecBtn" onclick="clearRecording()">✕ Clear</button>
+      </div>
+      <div class="rec-status" id="recStatus">No recording yet — tap Record and say something!</div>
+    </div>
+
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-main" id="startBtn" onclick="startReminder()">▶ Start</button>
+    <button class="btn-main" id="stopBtn" onclick="stopReminder()">⏹ Stop</button>
+  </div>
+
+  <p class="status" id="status">Press Start to begin reminders</p>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+  let timer = null;
+  let INTERVAL = 30;
+  let countdown = 30;
+  let reminderCount = 0;
+  let voiceMode = 'beep';
+  let recordedBlob = null;
+  let mediaRecorder = null;
+  let chunks = [];
+
+  const circumference = 2 * Math.PI * 58;
+  const ringFill = document.getElementById('ringFill');
+  ringFill.style.strokeDasharray = circumference;
+  ringFill.style.strokeDashoffset = circumference;
+
+  // Slider
+  document.getElementById('intervalSlider').addEventListener('input', function() {
+    INTERVAL = parseInt(this.value);
+    document.getElementById('sliderDisplay').textContent = INTERVAL;
+    document.getElementById('intervalLabel').textContent = INTERVAL;
+    if (!timer) {
+      countdown = INTERVAL;
+      document.getElementById('countdown').textContent = INTERVAL;
+      updateRing(INTERVAL);
+    }
+  });
+
+  function setVoiceMode(mode) {
+    voiceMode = mode;
+    document.querySelectorAll('.voice-tab').forEach((t, i) => {
+      t.classList.toggle('active', ['beep','tts','record'][i] === mode);
+    });
+    document.getElementById('ttsSection').classList.toggle('visible', mode === 'tts');
+    document.getElementById('recordSection').classList.toggle('visible', mode === 'record');
+  }
+
+  function updateRing(remaining) {
+    const offset = circumference * (1 - remaining / INTERVAL);
+    ringFill.style.strokeDashoffset = offset;
+    ringFill.style.stroke = remaining <= 5 ? '#FF1744' : '#FF6B00';
+  }
+
+  function tick() {
+    countdown--;
+    document.getElementById('countdown').textContent = countdown;
+    updateRing(countdown);
+    if (countdown <= 0) {
+      fireReminder();
+      countdown = INTERVAL;
+      updateRing(INTERVAL);
+      document.getElementById('countdown').textContent = INTERVAL;
+    }
+  }
+
+  function startReminder() {
+    if (timer) return;
+    countdown = INTERVAL;
+    updateRing(INTERVAL);
+    document.getElementById('countdown').textContent = INTERVAL;
+    reminderCount = 0;
+    document.getElementById('log').innerHTML = '';
+    timer = setInterval(tick, 1000);
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    document.getElementById('status').innerHTML = 'Running… first reminder in <strong>' + INTERVAL + 's</strong>';
+  }
+
+  function stopReminder() {
+    clearInterval(timer); timer = null;
+    document.getElementById('startBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('status').innerHTML = 'Stopped. Total reminders: <span class="count-badge">' + reminderCount + '</span>';
+    countdown = INTERVAL;
+    document.getElementById('countdown').textContent = INTERVAL;
+    updateRing(INTERVAL);
+    ringFill.style.stroke = '#FF6B00';
+  }
+
+  function fireReminder() {
+    reminderCount++;
+    const h1 = document.getElementById('mainText');
+    h1.classList.remove('shake'); void h1.offsetWidth; h1.classList.add('shake');
+    document.body.classList.remove('flash'); void document.body.offsetWidth; document.body.classList.add('flash');
+
+    if (voiceMode === 'beep') playBeep();
+    else if (voiceMode === 'tts') speakTTS();
+    else if (voiceMode === 'record') playRecording();
+
+    const dot = document.createElement('div');
+    dot.className = 'log-dot';
+    document.getElementById('log').prepend(dot);
+    document.getElementById('status').innerHTML =
+      'Reminder <span class="count-badge">#' + reminderCount + '</span> sent — جلدی کھاؤ! 🍴';
+  }
+
+  // Beep
+  function playBeep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [523.25, 659.25, 783.99].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'triangle'; osc.frequency.value = freq;
+        const t = ctx.currentTime + i * 0.1;
+        gain.gain.setValueAtTime(0.28, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        osc.start(t); osc.stop(t + 0.4);
+      });
+    } catch(e) {}
+  }
+
+  // TTS
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+
+  function speakTTS() {
+    const text = document.getElementById('ttsText').value.trim() || 'جلدی کھاؤ';
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+    const urdu = voices.find(v => v.lang && v.lang.startsWith('ur'))
+               || voices.find(v => v.lang && v.lang.startsWith('hi'))
+               || null;
+    if (urdu) utter.voice = urdu;
+    utter.lang = 'ur-PK';
+    utter.rate = 0.85;
+    window.speechSynthesis.speak(utter);
+  }
+
+  function testTTS() {
+    document.getElementById('ttsStatus').textContent = '🔊 Speaking…';
+    speakTTS();
+    setTimeout(() => { document.getElementById('ttsStatus').textContent = ''; }, 2500);
+  }
+
+  // Recording
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        recordedBlob = new Blob(chunks, { type: 'audio/webm' });
+        stream.getTracks().forEach(t => t.stop());
+        document.getElementById('recStatus').innerHTML = '✅ Recording saved! Tap Play to test it.';
+        document.getElementById('playRecBtn').style.display = 'inline-block';
+        document.getElementById('clearRecBtn').style.display = 'inline-block';
+        document.getElementById('recBtn').style.display = 'inline-block';
+        document.getElementById('stopRecBtn').style.display = 'none';
+      };
+      mediaRecorder.start();
+      document.getElementById('recBtn').style.display = 'none';
+      document.getElementById('stopRecBtn').style.display = 'inline-block';
+      document.getElementById('recStatus').innerHTML = '<span class="rec-dot"></span> Recording your voice…';
+    } catch(e) {
+      document.getElementById('recStatus').textContent = '⚠ Microphone access denied. Please allow it in browser settings.';
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  }
+
+  function playRecording() {
+    if (!recordedBlob) { alert('No recording yet!'); return; }
+    const url = URL.createObjectURL(recordedBlob);
+    const audio = new Audio(url);
+    audio.play();
+  }
+
+  function clearRecording() {
+    recordedBlob = null; chunks = [];
+    document.getElementById('recStatus').textContent = 'Cleared. Record again whenever ready.';
+    document.getElementById('playRecBtn').style.display = 'none';
+    document.getElementById('clearRecBtn').style.display = 'none';
+    document.getElementById('recBtn').style.display = 'inline-block';
+    document.getElementById('stopRecBtn').style.display = 'none';
+  }
+</script>
+</body>
+</html>
